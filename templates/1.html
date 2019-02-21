@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>1</title>
+    </head>
+    <body>
+        <input id="id-input-weibo">
+        <button id="id-button-add">发微博</button>
+        <script type="text/javascript">
+        var e = function(s) {
+            return document.querySelector(s)
+        }
+
+        var log = console.log.bind(console)
+
+        var ajax = function(method, path, data, responseCallback) {
+            var r = new XMLHttpRequest()
+            // 设置请求方法和请求地址
+            r.open(method, path, true)
+            // 设置发送的数据的格式为 application/json
+            // 这个不是必须的
+            r.setRequestHeader('Content-Type', 'application/json')
+            // 注册响应函数
+            r.onreadystatechange = function() {
+                if(r.readyState === 4) {
+                    // r.response 存的就是服务器发过来的放在 HTTP BODY 中的数据
+                    log('load ajax response', r.response)
+                    var json = JSON.parse(r.response)
+                    responseCallback(json)
+                }
+            }
+            // 把数据转换为 json 格式字符串
+            data = JSON.stringify(data)
+            // 发送请求
+            r.send(data)
+        }
+
+        var weiboTemplate = function(weibo) {
+            var t = `
+                <div id="id-weibos-list" data-id="${weibo.id}">
+                    <p id="id-weibo-list"></p>
+                        <h3>${weibo.content}</h3> <h3>from</h3> <h3>${weibo.user_id}</h3>
+                        <button class="weibo-delete">删除</button>
+                        <button class="weibo-edit">修改</button>
+                    <p></p>
+                    <input class="input-comment">
+                    <button class="button-comment">评论</button>
+                </div>
+            `
+            return t
+        }
+
+var insertWeibo = function(weibo) {
+    var weiboCell = weiboTemplate(weibo)
+    var body = document.body
+    body.insertAdjacentHTML('beforeend', weiboCell)
+}
+
+var apiWeiboAll = function(callback) {
+    var path = '/api/weibo/all'
+    ajax('GET', path, '', callback)
+}
+
+// var loadWeibos = function() {
+//     apiWeiboAll(function(weibos) {
+//         for(var i = 0; i < weibos.length; i++) {
+//             var weibo = weibos[i]
+//             insertWeibo(weibo)
+//         }
+//     })
+// }
+
+var apiWeiboAdd = function(form, callback) {
+    var path = '/api/weibo/add'
+    ajax('POST', path, form, callback)
+}
+
+var bindEventWeiboAdd = function() {
+    var b = e('#id-button-add')
+    b.addEventListener('click', function(){
+        var input = e('#id-input-weibo')
+        var title = input.value
+        var form = {
+            content: title,
+        }
+        apiWeiboAdd(form, function(weibo) {
+            insertWeibo(weibo)
+        })
+    })
+}
+
+var apiWeiboDelete = function(weibo_id, callback) {
+    var path = `/api/weibo/delete?id=${weibo_id}`
+    ajax('GET', path, '', callback)
+}
+
+var bindEventWeiboDelete = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+        var self = event.target
+        if (self.classList.contains('weibo-delete')) {
+            var weiboId = self.parentElement.dataset['id']
+            apiWeiboDelete(weiboId, function(r) {
+                // self.parentElement.remove()
+                // alert(r.message)
+                if (r.message == '成功删除 weibo') {
+                    self.parentElement.remove()
+                    alert(r.message)
+                } else {
+                    alert(r.message)
+                }
+            })
+        }
+    })
+}
+
+var apiWeiboUpdate = function(form, callback) {
+    var path = '/api/weibo/update'
+    ajax('POST', path, form, callback)
+}
+
+var editTemplate = function(s) {
+    var t = `
+        <input id='id-111' value='${s}'>
+        <button class='updata'>更新</button>
+    `
+    return t
+}
+
+var bindEventWeiboEdit = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+    var self = event.target
+    if (self.classList.contains('weibo-edit')) {
+        var d = self.parentElement
+        var weiboId = d.dataset['id']
+        var childs = d.childNodes
+        text = childs[3].innerText
+        d.insertAdjacentHTML('beforeEnd', editTemplate(text))
+    } else {
+        log('点到了')
+    }
+})}
+
+var bindEventWeiboUpdate = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+    var self = event.target
+    if (self.classList.contains('updata')) {
+        var d = self.parentElement
+        var weiboId = d.dataset['id']
+        var weiboInput = e('#id-111')
+        var content = weiboInput.value
+        var form = {
+            id: weiboId,
+            title: content,
+        }
+        apiWeiboUpdate(form, function(weibo) {
+            // var d = self.parentElement
+            // var childs = d.childNodes
+            // childs[3].innerText = weibo.content
+            if (weibo.message == '权限不足') {
+                alert(weibo.message)
+            } else {
+                var d = self.parentElement
+                var childs = d.childNodes
+                childs[3].innerText = weibo.content
+            }
+        })
+    } else {
+        log('点到了')
+    }
+})}
+
+var templateComment = function(comment) {
+    var t = `
+        <h2 id="id-comment-${comment.id}">${comment.content}</h2>
+        <button class='comment-delete' data-id="${comment.id}">删除评论</button>
+        <button class='comment-edit' data-id="${comment.id}">修改评论</button>
+    `
+    return t
+}
+
+var insertComment = function(comment) {
+    var divs = document.querySelectorAll('#id-weibos-list')
+    for(var i = 0; i < divs.length; i++) {
+        if(divs[i].dataset['id'] == comment.weibo_id) {
+            log(divs[i].childNodes)
+            divs[i].insertAdjacentHTML('beforeEnd', templateComment(comment))
+        }
+    }
+}
+
+var loadWeibos = function() {
+    apiWeiboAll(function(weibosAndComments) {
+        for(var i = 0; i < weibosAndComments[0].length; i++) {
+            var weibo = weibosAndComments[0][i]
+            insertWeibo(weibo)
+        }
+        for(var i = 0; i < weibosAndComments[1].length; i++) {
+            var comment = weibosAndComments[1][i]
+            insertComment(comment)
+        }
+    })
+}
+
+var apiCommentAdd = function(form, callback) {
+    var path = '/api/comment/add'
+    ajax('POST', path, form, callback)
+}
+
+var bindEventCommentAdd = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+        var self = event.target
+        if (self.classList.contains('button-comment')) {
+            var d = self.parentElement
+            var childs = d.childNodes
+            var value = childs[15].value
+            var form = {
+                content: value,
+                weibo_id: d.dataset['id'],
+            }
+            apiCommentAdd(form, function(comment) {
+                insertComment(comment)
+            })
+        }
+    })
+}
+
+var apiCommentDelete = function(comment_id, callback) {
+    var path = `/api/comment/delete?id=${comment_id}`
+    ajax('GET', path, '', callback)
+}
+
+var bindEventCommentDelete = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+        var self = event.target
+        if (self.classList.contains('comment-delete')) {
+            commentId = self.dataset['id']
+            apiCommentDelete(commentId, function(r) {
+                // self.previousElementSibling.remove()
+                // self.nextElementSibling.remove()
+                // self.remove()
+                // alert(r.message)
+                if (r.message == '成功删除 评论') {
+                    self.previousElementSibling.remove()
+                    self.nextElementSibling.remove()
+                    self.remove()
+                    alert(r.message)
+                } else {
+                    alert(r.message)
+                }
+            })
+        }
+    })
+}
+
+var apiCommentUpdate = function(form, callback) {
+    var path = '/api/comment/updata'
+    ajax('POST', path, form, callback)
+}
+
+var editCommentTemplate = function(s) {
+    var t = `
+        <input id='id-222' value='${s}'>
+        <button class='commentUpdata'>更新</button>
+    `
+    return t
+}
+
+var bindEventCommentEdit = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+        var self = event.target
+        if (self.classList.contains('comment-edit')) {
+            text = ''
+            self.insertAdjacentHTML('beforeEnd', editCommentTemplate(text))
+        }
+    })
+}
+
+var bindEventCommentUpdata = function() {
+    var body = document.body
+    body.addEventListener('click', function(event) {
+        var self = event.target
+        if (self.classList.contains('commentUpdata')) {
+            var commentId = self.parentElement.dataset['id']
+            log('commentId', commentId)
+            var commentInput = e('#id-222')
+            var content = commentInput.value
+            var form = {
+                id: commentId,
+                title: content,
+            }
+            apiCommentUpdate(form, function(comment) {
+                // var h = e(`#id-comment-${comment.id}`)
+                // h.innerText = comment.content
+                // self.previousElementSibling.remove()
+                // self.remove()
+                if (comment.message == '权限不足') {
+                    alert(comment.message)
+                } else {
+                    var h = e(`#id-comment-${comment.id}`)
+                    h.innerText = comment.content
+                    self.previousElementSibling.remove()
+                    self.remove()
+                }
+            })
+        }
+    })
+}
+
+
+var bindEvents = function() {
+    bindEventWeiboAdd()
+    bindEventWeiboDelete()
+    bindEventWeiboEdit()
+    bindEventWeiboUpdate()
+    bindEventCommentAdd()
+    bindEventCommentDelete()
+    bindEventCommentEdit()
+    bindEventCommentUpdata()
+}
+
+var __main = function() {
+    bindEvents()
+    loadWeibos()
+    // loadComment()
+}
+
+__main()
+        </script>
+    </body>
+</html>

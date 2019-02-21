@@ -1,0 +1,74 @@
+[
+  {
+    "id": 0,
+    "session_id": "r4ljk5j2gjjgkjse",
+    "user_id": 0,
+    "expired_time": 1543549120.653437
+  },
+  {
+    "id": 1,
+    "session_id": "52jj2525keb5es4l",
+    "user_id": 0,
+    "expired_time": 1543553798.4367604
+  },
+  {
+    "id": 2,
+    "session_id": "e25kjl4g2j2kdjjg",
+    "user_id": 0,
+    "expired_time": 1543903348.679094
+  },
+  {
+    "id": 3,
+    "session_id": "2g5kej5dlgse4dl5",
+    "user_id": 1,
+    "expired_time": 1543903373.7277174
+  },
+  {
+    "id": 4,
+    "session_id": "gg233kbkrgkkdjl2",
+    "user_id": 0,
+    "expired_time": 1546074200.411154
+  },
+  {
+    "id": 5,
+    "session_id": "le5kklk4s542e2s4",
+    "user_id": 0,
+    "expired_time": 1546845830.0777805
+  },
+  {
+    "id": 6,
+    "session_id": "dl2dggke52k4kelg",
+    "user_id": 1,
+    "expired_time": 1546846270.2331197
+  },
+  {
+    "id": 7,
+    "session_id": "2kj22e3jgg52jge2",
+    "user_id": 0,
+    "expired_time": 1546846375.631054
+  },
+  {
+    "id": 8,
+    "session_id": "3djglr5ked3skrs5",
+    "user_id": 0,
+    "expired_time": 1546847384.5833046
+  },
+  {
+    "id": 9,
+    "session_id": "gkjkl3jj245sgl2e",
+    "user_id": 0,
+    "expired_time": 1547103978.320635
+  },
+  {
+    "id": 10,
+    "session_id": "r2332jl45k25lkkj",
+    "user_id": 0,
+    "expired_time": 1550730479.4349556
+  },
+  {
+    "id": 11,
+    "session_id": "42ljdge25rekdjls",
+    "user_id": 0,
+    "expired_time": 1550730561.4677455
+  }
+]
